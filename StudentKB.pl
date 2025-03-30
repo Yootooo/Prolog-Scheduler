@@ -18,3 +18,6 @@ day_schedule(monday, [[math203],[physics201, csen202],[],[],[]]).
 day_schedule(tuesday, [[signals402],[physics201, csen202],[],[],[]]).
 day_schedule(wednesday, [[math203],[],[physics201, elct402],[],[]]).
 day_schedule(thursday, [[math203],[],[],[netw201, csen202],[]]).
+
+
+%test ziad 
