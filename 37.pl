@@ -16,7 +16,27 @@ student_schedule(Student, Slots) :-
 		  
     no_clashes(Slots),     
     study_days(Slots, 5).  
+
+
+count_days([],_,0).
+count_days([slot(X,_,_)|T],Acc,N):-
+	\+ member(X,Acc),
+	count_days(T,[X|Acc],N1),
+	N is N1+1.
+count_days([slot(X,_,_)|T],Acc,N):-
+	member(X,Acc),
+	count_days(T,Acc,N).
+study_days(Slots,DayCount):-
+	count_days(Slots,[],N),
+	N=<DayCount.
 	
+no_clashes([],_).
+no_clashes([slot(X,Y,_)|T],Acc):-
+	\+ member(pair(X,Y),Acc),
+	no_clashes(T,[pair(X,Y)|Acc]).
+no_clashes(Slots):-
+	no_clashes(Slots,[]).
+    
 
 % Find all valid (Day, Slot) pairs where all students are free 
 assembly_hours(Student_schedule, AH) :-
