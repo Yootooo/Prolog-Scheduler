@@ -17,6 +17,13 @@ student_schedule(Student, Slots) :-
     no_clashes(Slots),     
     study_days(Slots, 5).  
 	
+university_schedule(S) :-
+    % Adding Course^ tells Prolog to collect unique Student values only, ignoring Course.
+    setof(Student, Course^studies(Student, Course), Students), 
+    setof(sched(Student, Slots), 
+          (member(Student, Students), student_schedule(Student, Slots)), 
+          S).
+
 
 % Find all valid (Day, Slot) pairs where all students are free 
 assembly_hours(Student_schedule, AH) :-
