@@ -1,5 +1,5 @@
 :- consult('studentKB').
-
+:- consult('publicKB').
 
 find_slot(Course, [SlotCourses | _], SlotNumber, SlotNumber) :-
     member(Course, SlotCourses), !. 
