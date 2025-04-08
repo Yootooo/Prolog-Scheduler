@@ -94,31 +94,20 @@ university_schedule(S) :-
            (member(Student, Students), student_schedule(Student, Slots)), 
            S).
  */
-
-% Find all valid (Day, Slot) pairs where all students are free 
-assembly_hours(Student_schedule, AH) :-
-    setof(slot(Day, Slot),
-            (day_schedule(Day, _), 
-			  all_students_attend(Student_schedule, Day),
-              between(1, 5, Slot),
-              all_students_available(Student_schedule, Slot)
-            ),
-            AH).
-
-% Check if all students attend on a given day.
-all_students_attend([], _).
-all_students_attend([sched(_, Student_schedule)|T], Day_to_check):-
-    member(slot(Day_to_check, _, _), Student_schedule),
-    all_students_attend(T, Day_to_check).
-
-% Check if all students are available at a given slot.
-all_students_available([], _).
-all_students_available([sched(_, Student_schedule)|T], Slot_to_check) :-
-    \+ member(slot(_, Slot_to_check, _), Student_schedule),
-    all_students_available(T, Slot_to_check).
-
-
-
+assembly_hours(Schedules, AH) :-
+    findall(slot(Day, SlotNumber), (
+        day_schedule(Day, _),          
+        between(1, 5, SlotNumber),     
+        forall(
+            member(sched(_, StudentSlots), Schedules), 
+            ( 
+                \+ member(slot(Day, SlotNumber, _), StudentSlots), 
+                member(slot(Day, _, _), StudentSlots)               
+            )
+        )
+    ), AH).
+	
+	
 count_days([],_,0).
 count_days([slot(X,_,_)|T],Acc,N):-
 	\+ member(X,Acc),
