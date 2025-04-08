@@ -7,29 +7,100 @@ find_slot(Course, [_ | Rest], N, SlotNumber) :-
     N1 is N + 1,                 
     find_slot(Course, Rest, N1, SlotNumber).
 	
+assign_slots([], []).
+assign_slots([Course|RestCourses], [slot(Day, SlotNumber, Course)|RestSlots]) :-
+    day_schedule(Day, Schedule),
+    find_slot(Course, Schedule, 1, SlotNumber),
+    assign_slots(RestCourses, RestSlots).
+
 student_schedule(Student, Slots) :-
-    setof(slot(Day, SlotNumber, Course), 
-          (studies(Student, Course), 
-           day_schedule(Day, Schedule), 
-           find_slot(Course, Schedule, 1, SlotNumber)), 
-          Slots),
-		  
-    no_clashes(Slots),     
-    study_days(Slots, 5).  
+    findall(Course, studies(Student, Course), Courses),
+    assign_slots(Courses, Slots),
+    no_clashes(Slots),
+    study_days(Slots, 5).	
+
+/*
+get_all_for_slot(_,[],_,[]).
+get_all_for_slot(Day, [H|T], Cnt, Res):-
+	get_all_for_slot(Day,T,Cnt,R1),
+	append([slot(Day, Cnt, H)], R1, Res). 
 	
+	
+get_slots_for_day(day_schedule(Day,[]), _ , []).
+get_slots_for_day(day_schedule(Day,[H|T]),Cnt, Res):-
+	get_all_for_slot(Day, H, Cnt, R1),
+	Cnt2 is Cnt + 1,
+	get_slots_for_day(day_schedule(Day,T),Cnt2, R2),
+	append(R1, R2, Res).
+
+get_slots([],[]).	
+get_slots([H|T], All_slots):-
+	get_slots_for_day(H,1,S1),
+	get_slots(T,S2),
+	append(S1, S2, All_slots).
+	
+day_slots(Days_sched):-
+	findall(day_schedule(D,L),day_schedule(D,L),Days_sched).
+	
+ss_helper2([],_,_,[]).	
+
+ss_helper2([slot(D,N,S)|T], Student, Acc, Slots):-
+	studies(Student, S), \+ member(slot(_,_,S), Acc),
+	ss_helper2(T, Student, [slot(D,N,S)|Acc] , S2),
+	append([slot(D,N,S)], S2, Slots).
+
+ss_helper2([slot(D,N,S)|T], Student, Acc, Slots):-
+	studies(Student, S), \+ member(slot(_,_,S), Acc),
+	ss_helper2(T, Student, Acc , Slots).
+	
+ss_helper2([slot(D,N,S)|T], Student, Acc, Slots):-
+	studies(Student, S), member(slot(_,_,S), Acc),
+	ss_helper2(T, Student, Acc, Slots).
+	
+ss_helper2([slot(D,N,S)|T], Student, Acc, Slots):-
+	\+studies(Student, S),
+	ss_helper2(T, Student, Acc , Slots).
+		
+studyAll(_,[],_).		
+studyAll(Student, [studies(_,S)|T], Slots):-
+		member(slot(_,_,S), Slots),
+		studyAll(Student, T, Slots).
+
+student_schedule_helper(Student,Slots):-
+	day_slots(Days_sched), get_slots(Days_sched, All),
+	ss_helper2(All, Student, [], Slots),
+	findall(studies(Student,Sub), studies(Student,Sub), Sub),
+	studyAll(Student, Sub, Slots),
+	no_clashes(Slots),     
+    study_days(Slots, 5).
+	
+	
+student_schedule(Student, Slots) :-
+		student_schedule_helper(Student, Slots).
+*/	
+
+uni_helper([],[]).
+uni_helper([H|T], [sched(H,H1)|T1]):-
+	student_schedule(H, H1),
+	uni_helper(T,T1).
+
 university_schedule(S) :-
      % Adding Course^ tells Prolog to collect unique Student values only, ignoring Course.
      setof(Student, Course^studies(Student, Course), Students), 
-     setof(sched(Student, Slots), 
+	uni_helper(Students, S).
+	 
+	 
+	 /*setof(sched(Student, Slots), 
            (member(Student, Students), student_schedule(Student, Slots)), 
            S).
- 
+ */
 
 % Find all valid (Day, Slot) pairs where all students are free 
 assembly_hours(Student_schedule, AH) :-
     setof(slot(Day, Slot),
-            ( all_students_attend(Student_schedule, Day),
-              between(0, 5, Slot),
+            (day_schedule(Day, _), 
+			  all_students_attend(Student_schedule, Day),
+              between(1, 5, Slot),
               all_students_available(Student_schedule, Slot)
             ),
             AH).
