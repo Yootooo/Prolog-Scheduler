@@ -1,10 +1,11 @@
 :- consult('studentKB').
 :- consult('publicKB').
 
+find_slot(_,[],6,_):- fail.
 find_slot(Course, [SlotCourses | _], SlotNumber, SlotNumber) :-
-    member(Course, SlotCourses), !. 
-find_slot(Course, [_ | Rest], N, SlotNumber) :-
-    N1 is N + 1,                 
+    member(Course, SlotCourses). 
+find_slot(Course, [SlotCourses | Rest], N, SlotNumber) :-
+	N1 is N + 1,                 
     find_slot(Course, Rest, N1, SlotNumber).
 	
 assign_slots([], []).
@@ -14,7 +15,7 @@ assign_slots([Course|RestCourses], [slot(Day, SlotNumber, Course)|RestSlots]) :-
     assign_slots(RestCourses, RestSlots).
 
 student_schedule(Student, Slots) :-
-    findall(Course, studies(Student, Course), Courses),
+    setof(Course, studies(Student, Course), Courses),
     assign_slots(Courses, Slots),
     no_clashes(Slots),
     study_days(Slots, 5).	
