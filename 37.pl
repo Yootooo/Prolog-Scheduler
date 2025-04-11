@@ -86,9 +86,10 @@ uni_helper([H|T], [sched(H,H1)|T1]):-
 	uni_helper(T,T1).
 
 university_schedule(S) :-
-     % Adding Course^ tells Prolog to collect unique Student values only, ignoring Course.
-     setof(Student, Course^studies(Student, Course), Students), 
+    % Adding Course^ tells Prolog to collect unique Student values only, ignoring Course.
+    setof(Student, Course^studies(Student,Course), Students),
 	uni_helper(Students, S).
+
 	 
 	 
 	 /*setof(sched(Student, Slots), 
@@ -127,3 +128,4 @@ no_clashes([slot(X,Y,_)|T],Acc):-
 	no_clashes(T,[pair(X,Y)|Acc]).
 no_clashes(Slots):-
 	no_clashes(Slots,[]).
+	
